@@ -3,6 +3,7 @@
 #include "../include/configparser.h"
 #include "../include/logger.h"
 #include "../include/utils.h"
+#include "../include/game.h"
 
 int main()
 {
@@ -11,6 +12,9 @@ int main()
     configParse(&cParser);
     
     loggerInit(cParser);
+    setParams(cParser);
+
+    menu();
 
     loggerDeinit();
     return 0;

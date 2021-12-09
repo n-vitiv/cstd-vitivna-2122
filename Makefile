@@ -11,7 +11,7 @@ OBJECTS := $(SOURCES:$(SRCDIR)/%.c=%.o)
 all :$(PROJ_NAME) 
 
 $(PROJ_NAME) : $(OBJECTS)
-	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@ -lncurses
 
 $(OBJECTS) : %.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

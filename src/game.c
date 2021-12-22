@@ -127,6 +127,7 @@ void manVsMan()
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
 
+    user_input = 0;
     while (score.scoreA < 10 && score.scoreB < 10 && user_input != 'q')
     {
         initial_print();
@@ -154,6 +155,14 @@ void manVsMan()
     
     closeScreen(w);
 
+    if (user_input == 'q')
+    {
+        closeScreen(w);
+        isLoading = 0;
+        saveGame();
+        mainMenu();
+    }
+
     printf("========================== WINNER ================================\n");
     if (score.scoreA >= 10)
     {
@@ -165,7 +174,7 @@ void manVsMan()
     }
     printf("==================================================================\n");
     sleep(5);
-    menu();
+    mainMenu();
 }
 
 void manVsAI()
@@ -265,18 +274,24 @@ int game_loop()
 void initial_print()
 {
     clear();
-    
-    // Initializing Values
-    paddle.a = conf.boardHeight / 2;
-    paddle.b = conf.boardHeight / 2;
-    ball.x = conf.boardWidth / 2;
-    ball.y = conf.boardHeight / 2;
-    ball.dx = -1;
-    ball.dy = 1;
-    user_input = 0;
-    counter = 0;
-    ball_delay = 10;
 
+    if (!isLoading)
+    {
+        printLog(LOG_DEBUG, (char*)"initial_print: isLoading true\n");
+        // Initializing Values
+        paddle.a = conf.boardHeight / 2;
+        paddle.b = conf.boardHeight / 2;
+        ball.x = conf.boardWidth / 2;
+        ball.y = conf.boardHeight / 2;
+        ball.dx = -1;
+        ball.dy = 1;
+        user_input = 0;
+        counter = 0;
+        ball_delay = 10;
+    }
+    isLoading = 0;
+    printLog(LOG_DEBUG, (char*)"initial_print: after isLoading\n");
+    printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d", paddle.a, paddle.b, ball.x, ball.y);
     // Draw ball
     attron(COLOR_PAIR(1));
     mvprintw(ball.y, ball.x, "  ");
@@ -339,4 +354,256 @@ void setParams(configParser cParser)
     {
         conf.paddleLength = 5;
     }
+}
+
+void saveGame()
+{
+    system("clear");
+    int choice = 1;
+    printf("======================================================================================\n");
+    printf("=                                  Ping Pong game                                    =\n");
+    printf("=                                                                                    =\n");
+    printf("======================================================================================\n");
+    printf("= 1. Save game                                                                       =\n");
+    printf("= 2. Leave without save                                                              =\n");
+    printf("======================================================================================\n");
+    scanf("%d", &choice);
+    switch (choice)
+    {
+        case 1:
+        {
+            system("clear");
+            printf("Enter save name: ");
+            char name[32] = "saves/";
+            char filename[SAVE_NAME];
+            scanf("%s", filename);
+            printLog(LOG_DEBUG, (char*)"Creating new save: %s\n", filename);
+            createSaveAtXML(strcat(name, filename));
+            break;
+        }
+        case 2:
+            mainMenu();
+            break;
+        default:
+            printf("You entered bad mode. Please try again after 5 seconds.\n");
+            sleep(5);
+            system("clear");
+            saveGame();
+            break;
+    }
+}
+
+void loadGame()
+{
+    DIR *d;
+    struct dirent *dir;
+    int counter = 1, choice;
+    d = opendir("saves");
+    char saveName[32];
+    
+    if (d) 
+    {
+        while ((dir = readdir(d)) != NULL) 
+        {
+            if (!strcmp(dir->d_name, ".") || !strcmp(dir->d_name, ".."))
+                continue;
+            printf("%d. %s\n",counter, dir->d_name);
+            counter++;
+        }
+        closedir(d);
+    }
+    printf("%d. go to main menu\n", counter);
+    printf("Enter needed save (1-%d): ", counter);
+    scanf("%d", &choice);
+    if (choice > counter)
+    {
+        printf("Bad input.\nGoing back to main menu\n.");
+        sleep(3);
+        mainMenu();
+    }
+    else if (choice == counter)
+    {
+        mainMenu();
+    }
+
+    d = opendir("saves");
+    for (int i = 0; i < choice + 2; ++i)
+    {
+        dir = readdir(d);
+        strcpy(saveName, "saves/");
+        strcat(saveName, dir->d_name);
+    }
+    closedir(d);
+    printLog(LOG_DEBUG, (char*)"Loading game: %s\n", saveName);
+    isLoading = 1;
+    parseXMLSave(saveName);
+}
+
+void createSaveAtXML(char *name)
+{
+    FILE *f = fopen(strcat(name, ".xml"), "w");
+
+    //save ball data
+    fprintf(f, "<ball>\n");
+    fprintf(f, "\t<ball_x>%d</ball_x>\n", ball.x);
+    fprintf(f, "\t<ball_y>%d</ball_y>\n", ball.y);
+    fprintf(f, "\t<ball_dx>%d</ball_dx>\n", ball.dx);
+    fprintf(f, "\t<ball_dy>%d</ball_dy>\n", ball.dy);
+    fprintf(f, "</ball>\n");
+
+    //save player1 data
+    fprintf(f, "<paddleA>%d</paddleA>\n", paddle.a);
+    fprintf(f, "<scoreA>%d</scoreA>\n", score.scoreA);
+
+    //save player2 data
+    fprintf(f, "<paddleB>%d</paddleB>\n", paddle.b);
+    fprintf(f, "<scoreB>%d</scoreB>\n", score.scoreB);
+
+    fclose(f);
+}
+
+void parseXMLSave(char *name)
+{
+    // Initializing Values by default
+    paddle.a = conf.boardHeight / 2;
+    paddle.b = conf.boardHeight / 2;
+    ball.x = conf.boardWidth / 2;
+    ball.y = conf.boardHeight / 2;
+    ball.dx = -1;
+    ball.dy = 1;
+    user_input = 0;
+    counter = 0;
+    ball_delay = 10;
+    
+    FILE *fp = fopen(name, "r");
+    if (fp == NULL)
+    {
+        printLog(LOG_ERROR, (char*)"can`t load file: %s\n", name);
+        return;
+    }
+
+    char *buffer = NULL;
+    size_t buflen = 0;
+    char *target = NULL;
+    char *start, *end;
+
+    while (getline(&buffer, &buflen, fp) != -1)
+    {
+        if (strstr(buffer, "<ball_x>") != NULL)
+        {
+            start = strstr(buffer, "<ball_x>");
+            start += strlen("<ball_x>");
+            end = strstr(start, "</ball_x>");
+            printLog(LOG_DEBUG, (char*)"start: %s\n", start);
+            printLog(LOG_DEBUG, (char*)"end: %s\n", end);
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                ball.x = atoi(target);
+                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
+            }
+        }
+        else if (strstr(buffer, "ball_y") != NULL)
+        {
+            start = strstr(buffer, "<ball_y>");
+            start += strlen("<ball_y>");
+            end = strstr( start, "</ball_y>" );
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                ball.y = atoi(target);
+                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
+            }
+        }
+        else if (strstr(buffer, "ball_dx") != NULL)
+        {
+            start = strstr(buffer, "<ball_dx>");
+            start += strlen("<ball_dx>");
+            end = strstr(start, "</ball_dx>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                ball.dx = atoi(target);
+                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
+            }
+        }
+        else if (strstr(buffer, "ball_dy") != NULL)
+        {
+            start = strstr(buffer, "<ball_dy>");
+            start += strlen("<ball_dy>");
+            end = strstr(start, "</ball_dy>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                ball.dy = atoi(target);
+                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
+            }
+        }
+        else if (strstr(buffer, "paddleA") != NULL)
+        {
+            start = strstr(buffer, "<paddleA>");
+            start += strlen("<paddleA>");
+            end = strstr(start, "</paddleA>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                paddle.a = atoi(target);
+            }
+        }
+        else if (strstr(buffer, "paddleB") != NULL)
+        {
+            start = strstr(buffer, "<paddleB>");
+            start += strlen("<paddleB>");
+            end = strstr(start, "</paddleB>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                paddle.b = atoi(target);
+            }
+        }
+        else if (strstr(buffer, "scoreA") != NULL)
+        {
+            start = strstr(buffer, "<scoreA>");
+            start += strlen("<scoreA>");
+            end = strstr(start, "</scoreA>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                score.scoreA = atoi(target);
+            }
+        }
+        else if (strstr(buffer, "scoreB") != NULL)
+        {
+            start = strstr(buffer, "<scoreB>");
+            start += strlen("<scoreB>");
+            end = strstr(start, "</scoreB>");
+            if (end != NULL)
+            {
+                target = ( char * )malloc( end - start + 1 );
+                memcpy( target, start, end - start );
+                target[end - start] = '\0';
+                score.scoreB = atoi(target);
+            }
+        }
+    }
+    free(buffer);
+    if (fp != NULL)
+    {
+        fclose(fp);
+    }
+    manVsMan();
 }

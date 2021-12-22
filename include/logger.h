@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+extern FILE *fLog;
+
 typedef enum
 {
     LOG_DEBUG,

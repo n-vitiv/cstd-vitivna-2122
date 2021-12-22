@@ -1,11 +1,15 @@
 #include "../include/game.h"
 #include "../include/logger.h"
 
+#include <string.h>
+#include <dirent.h> 
 #include <unistd.h>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <stdio.h>
 
 #define FRAMETIME 80000
+#define SAVE_NAME 16
 
 int user_input;
 paddleData paddle;
@@ -14,6 +18,25 @@ scoreCount score;
 configure conf;
 int counter;
 int ball_delay;
+int isLoading = 0;
+
+void mainMenu()
+{
+    system("clear");
+    int mode = 1;
+    printf("======================================================================================\n");
+    printf("=                                  Ping Pong game                                    =\n");
+    printf("=                                                                                    =\n");
+    printf("======================================================================================\n");
+    printf("= Game modes                                                                         =\n");
+    printf("= 1. Play game                                                                       =\n");
+    printf("= 2. Load game                                                                       =\n");
+    printf("= 3. Quit game                                                                       =\n");
+    printf("======================================================================================\n");
+    printf("= Enter your choice (1-3): ");
+    scanf("%d", &mode);
+    mainMenuChoice(mode);
+}
 
 void menu()
 {
@@ -30,11 +53,37 @@ void menu()
     printf("= 2. Man vs AI                                                                       =\n");
     printf("= 3. AI vs AI                                                                        =\n");
     printf("======================================================================================\n");
-    printf("= 4. Quit game                                                                       =\n");
-    printf("======================================================================================\n");
-    printf("= Enter your choice (1-4): ");
+    printf("= Enter your choice (1-3): ");
     scanf("%d", &mode);
     modeChoice(mode);
+}
+
+void mainMenuChoice(int choice)
+{
+    switch (choice)
+    {
+    case 1:
+        system("clear");
+        printLog(LOG_DEBUG, (char*)"choice: play game\n");
+        menu();
+        break;
+    case 2:
+        system("clear");
+        printLog(LOG_DEBUG, (char*)"choice: load game\n");
+        loadGame();
+        break;
+    case 3:
+        printf("Leaving game.\n");
+        sleep(3);
+        system("clear");
+        return;
+    default:
+        printf("You entered bad mode. Please try again after 5 seconds.\n");
+        sleep(5);
+        system("clear");
+        mainMenu();
+        break;
+    }
 }
 
 void modeChoice(int mode)
@@ -43,26 +92,20 @@ void modeChoice(int mode)
     {
     case 1:
         system("clear");
-        printLog(LOG_DEBUG, (char*)"mode: man vs man");
+        printLog(LOG_DEBUG, (char*)"mode: man vs man\n");
         manVsMan();
         break;
     
     case 2:
         system("clear");
-        printLog(LOG_DEBUG, (char*)"mode: man vs ai");
+        printLog(LOG_DEBUG, (char*)"mode: man vs ai\n");
         manVsAI();
         break;
 
     case 3:
         system("clear");
-        printLog(LOG_DEBUG, (char*)"mode: ai vs ai");
+        printLog(LOG_DEBUG, (char*)"mode: ai vs ai\n");
         AIvsAI();
-        break;
-
-    case 4:
-        printf("Leaving game.\n");
-        sleep(3);
-        system("clear");
         break;
 
     default:

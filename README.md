@@ -42,7 +42,7 @@ For manual testing read file tests/manual
 
 At version 2.0:
 
-New tag: <pong>_<2.0>_51<21513>
+New tag: cstd-vitivna-2122_v2p0_WW21513
 
 Added new feature: save/load game
 

@@ -9,7 +9,7 @@
 #include "../include/logger.h"
 #include "../include/utils.h"
 
-static FILE *fLog;
+FILE *fLog;
 
 pthread_mutex_t mutex;
 
@@ -42,6 +42,7 @@ void loggerDeinit()
     if (fLog != NULL)
     {
         fclose(fLog);
+        fLog = NULL;
     }
     if (pthread_mutex_destroy(&mutex) != 0)
     {

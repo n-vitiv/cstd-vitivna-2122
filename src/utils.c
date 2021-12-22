@@ -9,7 +9,7 @@
 char* getTime()
 {
     static char timeStr[MAX_TIME];
-    char *format = "%d-%m-%Y %H:%M:%S";
+    char *format = (char*)"%d-%m-%Y %H:%M:%S";
     struct tm *currentTime;
     time_t timer;
 

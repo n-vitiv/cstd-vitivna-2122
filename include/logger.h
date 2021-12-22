@@ -1,6 +1,12 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#if __cplusplus
+extern "C" {
+#endif
+
+extern FILE *fLog;
+
 typedef enum
 {
     LOG_DEBUG,
@@ -28,5 +34,9 @@ void loggerDeinit();
  * @param msg message which will be logged
  */
 void printLog(logLevel level, char *msg, ...);
+
+#if __cplusplus
+}
+#endif
 
 #endif

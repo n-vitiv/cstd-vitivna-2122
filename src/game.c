@@ -43,19 +43,19 @@ void modeChoice(int mode)
     {
     case 1:
         system("clear");
-        printLog(LOG_DEBUG, "mode: man vs man");
+        printLog(LOG_DEBUG, (char*)"mode: man vs man");
         manVsMan();
         break;
     
     case 2:
         system("clear");
-        printLog(LOG_DEBUG, "mode: man vs ai");
+        printLog(LOG_DEBUG, (char*)"mode: man vs ai");
         manVsAI();
         break;
 
     case 3:
         system("clear");
-        printLog(LOG_DEBUG, "mode: ai vs ai");
+        printLog(LOG_DEBUG, (char*)"mode: ai vs ai");
         AIvsAI();
         break;
 
@@ -254,7 +254,7 @@ void draw_scoreline()
 {
     // Drawing user names
     attroff(COLOR_PAIR(1));
-    char *a = malloc(10);
+    char *a = (char*)malloc(10);
     sprintf(a, "User A: %d", score.scoreA);
     mvprintw(0, 1, a);
     sprintf(a, "User B: %d", score.scoreB);
@@ -279,19 +279,19 @@ void draw_scoreline()
 
 void setParams(configParser cParser)
 {
-    conf.boardHeight = atoi(getValue("board_height", &cParser));
+    conf.boardHeight = atoi(getValue((char*)"board_height", &cParser));
     if (conf.boardHeight <= 0)
     {
         conf.boardHeight = 24;
     }
 
-    conf.boardWidth = atoi(getValue("board_width", &cParser));
+    conf.boardWidth = atoi(getValue((char*)"board_width", &cParser));
     if (conf.boardWidth <= 0)
     {
         conf.boardWidth = 80;
     }
 
-    conf.paddleLength = atoi(getValue("tool_size", &cParser));
+    conf.paddleLength = atoi(getValue((char*)"tool_size", &cParser));
     if (conf.paddleLength <= 0)
     {
         conf.paddleLength = 5;

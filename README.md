@@ -39,3 +39,13 @@ To run game print ./game
 To run unit tests run: ./unitTest
 
 For manual testing read file tests/manual
+
+At version 2.0:
+
+New tag: <pong>_<2.0>_51<21513>
+
+Added new feature: save/load game
+
+For saving game press 'q' during the game.
+
+If you want to load a saved game, choose needed button at main menu.

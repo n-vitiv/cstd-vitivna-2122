@@ -9,23 +9,29 @@ HW interface - UART
 Data driven format - xml
 
 Play modes:
-    * Man vs AI
-    * Man vs Man
-    * AI vs AI
+* Man vs AI
+* Man vs Man
+* AI vs AI
 
 AI supports next complexity levels:
-    * Random move
-    * Win strategy
+* Random move
+* Win strategy
 
 Actions:
-    * New
-    * Save
-    * Load
+* New
+* Save
+* Load
 
 The proposal for data driven approach: configuration (saved in configuration file or DB):
-    * board size
-    * distance
-    * tool size
-    * win statement
-    * lose statement
-    * AI parameters
+* board size
+* tool size
+
+There was created .config file with fields:
+* board_width
+* board_height
+* tool_size
+
+For full compilation use bash script:
+./ci.sh
+This script will install all neede libs and will run compilation.
+To run game print ./game

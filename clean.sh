@@ -2,4 +2,4 @@
 
 make clean
 
-rm -rf bin/
+rm -rf bin/ unitTest

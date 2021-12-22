@@ -7,6 +7,7 @@ chmod +x ./clean.sh
 #libs installing
 sudo apt install build-essential
 sudo apt install libncurses5-dev
+sudo apt install libgtest-dev
 
 #compilation
 make
@@ -14,3 +15,7 @@ make
 #moving binary files to directory
 mkdir bin
 mv -f *.o bin/
+
+cd tests
+make
+mv unitTest ../

@@ -35,3 +35,7 @@ For full compilation use bash script:
 ./ci.sh
 This script will install all neede libs and will run compilation.
 To run game print ./game
+
+To run unit tests run: ./unitTest
+
+For manual testing read file tests/manual

@@ -4,6 +4,10 @@
 #include <ncurses.h>
 #include "configparser.h"
 
+#if __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
 	int x, y;       // position on the screen
@@ -78,5 +82,9 @@ void draw_scoreline();
  * 
  */
 void setParams(configParser cParser);
+
+#if __cplusplus
+}
+#endif
 
 #endif

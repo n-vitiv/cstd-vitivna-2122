@@ -6,6 +6,10 @@
 #define KEY_WORD_SIZE 32
 #define VALUE_SIZE 32
 
+#if __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief struct for saving words and values
  * 
@@ -42,5 +46,7 @@ void configParse(configParser *cParser);
  * @return value of the key
  */
 char* getValue(char *key, configParser *cParser);
-
+#if __cplusplus
+}
+#endif
 #endif

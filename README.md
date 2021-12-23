@@ -63,3 +63,14 @@ AI supports 3 game modes:
 * norm
 * hard
 Game modes can be changed at .config file at field 'ai_mode'
+
+At version 4.0:
+
+New tag cstd-vitivna-2122-v4p0-WW21514
+
+Added database support:
+
+All needed packages can be installed by ci.sh script.
+
+User should create new user with name: 'ponguser' and password: 'ponguser'.
+If user will not do this, game will not start.

@@ -83,6 +83,41 @@ void draw_scoreline();
  */
 void setParams(configParser cParser);
 
+/**
+ *
+ */
+void mainMenu();
+
+/**
+ * 
+ */
+void mainMenuChoice(int choice);
+
+/**
+ * 
+ */
+void saveGame();
+
+/**
+ * 
+ */
+void loadGame();
+
+/**
+ *
+ */
+void createSaveAtXML(char *name);
+
+/**
+ *
+ */
+void parseXMLSave(char *name);
+
+/**
+ *
+ */
+void initScreen(WINDOW *w);
+
 #if __cplusplus
 }
 #endif

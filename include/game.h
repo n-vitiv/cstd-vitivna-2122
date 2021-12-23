@@ -4,6 +4,8 @@
 #include <ncurses.h>
 #include "configparser.h"
 
+#define MODE_BUF 5
+
 #if __cplusplus
 extern "C" {
 #endif
@@ -29,7 +31,22 @@ typedef struct
 	int paddleLength;
 	int boardWidth;
 	int boardHeight;
+	char mode[MODE_BUF];
 } configure;
+
+typedef enum
+{
+	MAN_VS_MAN,
+	MAN_VS_AI,
+	AI_VS_AI
+} gameMode;
+
+typedef enum
+{
+	EASY,
+	NORM,
+	HARD
+} aiMode;
 
 /**
  * @brief function for printing game menu to console
@@ -66,7 +83,7 @@ void closeScreen(WINDOW *w);
 /**
  * 
  */
-int game_loop();
+int game_loop(gameMode mode);
 
 /**
  * 
@@ -117,6 +134,16 @@ void parseXMLSave(char *name);
  *
  */
 void initScreen(WINDOW *w);
+
+/**
+ * 
+ */
+void play(gameMode mode);
+
+/**
+ * 
+ */
+aiMode strAiModeToInt(char *mode);
 
 #if __cplusplus
 }

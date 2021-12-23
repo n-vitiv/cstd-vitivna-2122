@@ -16,6 +16,7 @@ paddleData paddle;
 ballData ball;
 scoreCount score;
 configure conf;
+aiMode ai;
 int counter;
 int ball_delay;
 int isLoading = 0;
@@ -44,6 +45,8 @@ void menu()
     score.scoreB = 0;
     system("clear");
     int mode = 1;
+    ai = strAiModeToInt(conf.mode);
+    printLog(LOG_DEBUG, (char*)"ai mode: %s\n", conf.mode);
     printf("======================================================================================\n");
     printf("=                                  Ping Pong game                                    =\n");
     printf("=                                                                                    =\n");
@@ -93,19 +96,19 @@ void modeChoice(int mode)
     case 1:
         system("clear");
         printLog(LOG_DEBUG, (char*)"mode: man vs man\n");
-        manVsMan();
+        play(MAN_VS_MAN);
         break;
     
     case 2:
         system("clear");
         printLog(LOG_DEBUG, (char*)"mode: man vs ai\n");
-        manVsAI();
+        play(MAN_VS_AI);
         break;
 
     case 3:
         system("clear");
         printLog(LOG_DEBUG, (char*)"mode: ai vs ai\n");
-        AIvsAI();
+        play(AI_VS_AI);
         break;
 
     default:
@@ -117,7 +120,7 @@ void modeChoice(int mode)
     }
 }
 
-void manVsMan()
+void play(gameMode mode)
 {
     WINDOW *w = initscr();
     noecho();
@@ -136,7 +139,7 @@ void manVsMan()
         while (user_input != 'q')
         {
             user_input = getch();
-            loop = game_loop();
+            loop = game_loop(mode);
             if (loop == 'a')
             {
                 score.scoreA++;
@@ -177,29 +180,8 @@ void manVsMan()
     mainMenu();
 }
 
-void manVsAI()
+void manVsMan()
 {
-    menu();
-}
-
-void AIvsAI()
-{
-    menu();
-}
-
-void closeScreen(WINDOW *w)
-{
-    // Closing screen sequence
-    nocbreak();
-    nodelay(w, FALSE);
-    echo();
-    curs_set(TRUE);
-    endwin();
-}
-
-int game_loop()
-{
-    
     // Edit paddle A
     if (user_input == 'w' && paddle.a > 4)
     {
@@ -216,7 +198,7 @@ int game_loop()
         attron(COLOR_PAIR(1));
         paddle.a++;
         mvprintw(paddle.a + conf.paddleLength / 2, 1, " ");
-    }    
+    }
     
     // Edit paddle B 
     if (user_input == 'o' && paddle.b > 4)
@@ -234,8 +216,131 @@ int game_loop()
         attron(COLOR_PAIR(1));
         paddle.b++;
         mvprintw(paddle.b + conf.paddleLength / 2, conf.boardWidth - 1, " ");
+    }
+}
+
+void manVsAI()
+{
+    int random;
+    if (ai == NORM)
+        random = rand() % 100 - 92;
+    else if (ai == HARD)
+        random = rand() % 100 - 90;
+    else
+        random = rand() % 100 - 95;
+
+    if (user_input == 'w' && paddle.a > 4)
+    {
+        attroff(COLOR_PAIR(1));
+        mvprintw(paddle.a + conf.paddleLength / 2, 1, "  ");
+        attron(COLOR_PAIR(1));
+        paddle.a--;
+        mvprintw(paddle.a - conf.paddleLength / 2, 1, " ");
+    }
+    else if (user_input == 's' && paddle.a < conf.boardHeight - 3)
+    {
+        attroff(COLOR_PAIR(1));
+        mvprintw(paddle.a - conf.paddleLength / 2, 1, " ");
+        attron(COLOR_PAIR(1));
+        paddle.a++;
+        mvprintw(paddle.a + conf.paddleLength / 2, 1, " ");
+    }
+
+    if (random > 0 && ball.dx > 0)
+    {
+        if (ball.y > paddle.b && paddle.b < conf.boardHeight - 3)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.b - conf.paddleLength / 2, conf.boardWidth - 1, " ");
+            attron(COLOR_PAIR(1));
+            paddle.b++;
+            mvprintw(paddle.b + conf.paddleLength / 2, conf.boardWidth - 1, " ");
+        }
+        else if (ball.y < paddle.b && paddle.b > 4)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.b + conf.paddleLength / 2, conf.boardWidth - 1, " ");
+            attron(COLOR_PAIR(1));
+            paddle.b--;
+            mvprintw(paddle.b - conf.paddleLength / 2, conf.boardWidth - 1, " ");
+        }
+    }
+}
+
+void AIvsAI()
+{
+    int random;
+    if (ai == NORM)
+        random = rand() % 100 - 92;
+    else if (ai == HARD)
+        random = rand() % 100 - 90;
+    else
+        random = rand() % 100 - 95;
+    if (random > 0 && ball.dx < 0)
+    {
+        if (ball.y < paddle.a && paddle.a > 4)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.a + conf.paddleLength / 2, 1, "  ");
+            attron(COLOR_PAIR(1));
+            paddle.a--;
+            mvprintw(paddle.a - conf.paddleLength / 2, 1, " ");
+        }
+        else if (ball.y > paddle.a && paddle.a < conf.boardHeight - 3)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.a - conf.paddleLength / 2, 1, " ");
+            attron(COLOR_PAIR(1));
+            paddle.a++;
+            mvprintw(paddle.a + conf.paddleLength / 2, 1, " ");
+        }
     }    
-    
+    if (random > 0 && ball.dx > 0)
+    {
+        if (ball.y > paddle.b && paddle.b < conf.boardHeight - 3)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.b - conf.paddleLength / 2, conf.boardWidth - 1, " ");
+            attron(COLOR_PAIR(1));
+            paddle.b++;
+            mvprintw(paddle.b + conf.paddleLength / 2, conf.boardWidth - 1, " ");
+        }
+        else if (ball.y < paddle.b && paddle.b > 4)
+        {
+            attroff(COLOR_PAIR(1));
+            mvprintw(paddle.b + conf.paddleLength / 2, conf.boardWidth - 1, " ");
+            attron(COLOR_PAIR(1));
+            paddle.b--;
+            mvprintw(paddle.b - conf.paddleLength / 2, conf.boardWidth - 1, " ");
+        }
+    }
+}
+
+void closeScreen(WINDOW *w)
+{
+    // Closing screen sequence
+    nocbreak();
+    nodelay(w, FALSE);
+    echo();
+    curs_set(TRUE);
+    endwin();
+}
+
+int game_loop(gameMode mode)
+{
+    if (mode == MAN_VS_MAN)
+    {
+        manVsMan();
+    }
+    else if (mode == MAN_VS_AI)
+    {
+        manVsAI();
+    }
+    else if (mode == AI_VS_AI)
+    {
+        AIvsAI();
+    }
+
     // Handling the ball occasionally
     if (counter == ball_delay-1) 
     {
@@ -353,6 +458,32 @@ void setParams(configParser cParser)
     if (conf.paddleLength <= 0)
     {
         conf.paddleLength = 5;
+    }
+
+    strcpy(conf.mode, getValue((char*)"ai_mode", &cParser));
+    if (conf.mode == NULL)
+    {
+        strcpy(conf.mode, "easy");
+    }
+}
+
+aiMode strAiModeToInt(char *mode)
+{
+    if (!strcmp(mode, "easy"))
+    {
+        return EASY;
+    }
+    else if (!strcmp(mode, "norm"))
+    {
+        return NORM;
+    }
+    else if (!strcmp(mode, "hard"))
+    {
+        return HARD;
+    }
+    else
+    {
+        return EASY;
     }
 }
 
@@ -599,5 +730,5 @@ void parseXMLSave(char *name)
     {
         fclose(fp);
     }
-    manVsMan();
+    play(MAN_VS_MAN);
 }

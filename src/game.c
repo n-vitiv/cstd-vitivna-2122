@@ -494,15 +494,12 @@ void parseXMLSave(char *name)
             start = strstr(buffer, "<ball_x>");
             start += strlen("<ball_x>");
             end = strstr(start, "</ball_x>");
-            printLog(LOG_DEBUG, (char*)"start: %s\n", start);
-            printLog(LOG_DEBUG, (char*)"end: %s\n", end);
             if (end != NULL)
             {
                 target = ( char * )malloc( end - start + 1 );
                 memcpy( target, start, end - start );
                 target[end - start] = '\0';
                 ball.x = atoi(target);
-                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
             }
         }
         else if (strstr(buffer, "ball_y") != NULL)
@@ -516,7 +513,6 @@ void parseXMLSave(char *name)
                 memcpy( target, start, end - start );
                 target[end - start] = '\0';
                 ball.y = atoi(target);
-                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
             }
         }
         else if (strstr(buffer, "ball_dx") != NULL)
@@ -530,7 +526,6 @@ void parseXMLSave(char *name)
                 memcpy( target, start, end - start );
                 target[end - start] = '\0';
                 ball.dx = atoi(target);
-                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
             }
         }
         else if (strstr(buffer, "ball_dy") != NULL)
@@ -544,7 +539,6 @@ void parseXMLSave(char *name)
                 memcpy( target, start, end - start );
                 target[end - start] = '\0';
                 ball.dy = atoi(target);
-                printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d\n", paddle.a, paddle.b, ball.x, ball.y);
             }
         }
         else if (strstr(buffer, "paddleA") != NULL)

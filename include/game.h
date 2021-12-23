@@ -149,4 +149,8 @@ aiMode strAiModeToInt(char *mode);
 }
 #endif
 
+#if !__cplusplus
+void parseDBSave(char *name);
+#endif
+
 #endif

@@ -1,5 +1,8 @@
 #include "../include/game.h"
 #include "../include/logger.h"
+#if !__cplusplus
+#include "../include/database.h"
+#endif
 
 #include <string.h>
 #include <dirent.h> 
@@ -79,7 +82,7 @@ void mainMenuChoice(int choice)
         printf("Leaving game.\n");
         sleep(3);
         system("clear");
-        return;
+        exit(1);
     default:
         printf("You entered bad mode. Please try again after 5 seconds.\n");
         sleep(5);
@@ -171,7 +174,7 @@ void play(gameMode mode)
     {
         printf("========================= PLAYER A ===============================\n");
     }
-    else
+    else if (score.scoreB >= 10)
     {
         printf("========================= PLAYER B ===============================\n");
     }
@@ -395,8 +398,6 @@ void initial_print()
         ball_delay = 10;
     }
     isLoading = 0;
-    printLog(LOG_DEBUG, (char*)"initial_print: after isLoading\n");
-    printLog(LOG_DEBUG, (char*)"initial_print: %d, %d, %d, %d", paddle.a, paddle.b, ball.x, ball.y);
     // Draw ball
     attron(COLOR_PAIR(1));
     mvprintw(ball.y, ball.x, "  ");
@@ -509,6 +510,9 @@ void saveGame()
             char filename[SAVE_NAME];
             scanf("%s", filename);
             printLog(LOG_DEBUG, (char*)"Creating new save: %s\n", filename);
+#if !__cplusplus
+            saveData(filename, ball.x, ball.y, ball.dx, ball.dy, paddle.a, paddle.b, score.scoreA, score.scoreB);
+#endif
             createSaveAtXML(strcat(name, filename));
             break;
         }
@@ -561,13 +565,21 @@ void loadGame()
     for (int i = 0; i < choice + 2; ++i)
     {
         dir = readdir(d);
+#if __cplusplus
         strcpy(saveName, "saves/");
         strcat(saveName, dir->d_name);
+#else
+        strcpy(saveName, dir->d_name);
+#endif
     }
     closedir(d);
     printLog(LOG_DEBUG, (char*)"Loading game: %s\n", saveName);
     isLoading = 1;
+#if __cplusplus
     parseXMLSave(saveName);
+#else
+    parseDBSave(saveName);
+#endif
 }
 
 void createSaveAtXML(char *name)
@@ -732,3 +744,78 @@ void parseXMLSave(char *name)
     }
     play(MAN_VS_MAN);
 }
+
+#if !__cplusplus
+void parseDBSave(char *name)
+{
+    // Initializing Values by default
+    paddle.a = conf.boardHeight / 2;
+    paddle.b = conf.boardHeight / 2;
+    ball.x = conf.boardWidth / 2;
+    ball.y = conf.boardHeight / 2;
+    ball.dx = -1;
+    ball.dy = 1;
+    user_input = 0;
+    counter = 0;
+    ball_delay = 10;
+
+    char msg[512];
+    snprintf(msg, 512, "SELECT * FROM save WHERE name LIKE '%s'", name);
+    if (mysql_query(conn, msg))
+    {
+        printLog(LOG_ERROR, (char*)"%s\n", mysql_error(conn));
+    }
+    MYSQL_RES *result = mysql_store_result(conn);
+
+    if (result == NULL)
+    {
+        printLog(LOG_ERROR, (char*)"%s\n", mysql_error(conn));
+        return;
+    }
+    int numFields = mysql_num_fields(result);
+
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < numFields; i++)
+        {
+            if (i <= 1)
+            {
+                continue;
+            }
+            printLog(LOG_DEBUG, "%s \n", row[i] ? row[i] : "NULL");
+            switch (i)
+            {
+            case 2:
+                ball.x = atoi(row[i]);
+                break;
+            case 3:
+                ball.y = atoi(row[i]);
+                break;
+            case 4:
+                ball.dx = atoi(row[i]);
+                break;
+            case 5:
+                ball.dy = atoi(row[i]);
+                break;
+            case 6:
+                paddle.a = atoi(row[i]);
+                break;
+            case 7:
+                paddle.b = atoi(row[i]);
+                break;
+            case 8:
+                score.scoreA = atoi(row[i]);
+                break;
+            case 9:
+                score.scoreB = atoi(row[i]);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    play(MAN_VS_MAN);
+}
+#endif

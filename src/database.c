@@ -55,10 +55,10 @@ void createTable()
 void saveData(char* name, int ball_x, int ball_y, int ball_dx, int ball_dy,
                 int paddleA, int paddleB, int scoreA, int scoreB)
 {
-     printLog(LOG_ERROR, "SAVE DATA\n");
+    printLog(LOG_ERROR, "SAVE DATA\n");
     char msg[512];
     snprintf(msg, 512, "INSERT INTO save (id, name, ball_x, ball_y, ball_dx, ball_dy, paddleA, paddleB, scoreA, scoreB) \
-            VALUES(DEFAULT, '%s', %d, %d, %d, %d, %d, %d, %d, %d)", 
+            VALUES(DEFAULT, '%s.xml', %d, %d, %d, %d, %d, %d, %d, %d)", 
             name, ball_x, ball_y, ball_dx, ball_dy, paddleA, paddleB, scoreA, scoreB);
     if (mysql_query(conn, msg))
     {

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "../include/configparser.h"
 #include "../include/logger.h"
 #include "../include/utils.h"
@@ -8,6 +9,7 @@
 
 int main()
 {
+    srand(time(NULL));
     system("mkdir saves");
     configParser cParser;
     strcpy(cParser.filePath, ".config");

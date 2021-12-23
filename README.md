@@ -49,3 +49,17 @@ Added new feature: save/load game
 For saving game press 'q' during the game.
 
 If you want to load a saved game, choose needed button at main menu.
+
+At version 3.0:
+
+New tag: cstd-vitivna-2122-v3p0-WW21514
+
+Added new game modes:
+* Man vs AI
+* AI vs AI
+
+AI supports 3 game modes:
+* easy
+* norm
+* hard
+Game modes can be changed at .config file at field 'ai_mode'
